@@ -1,6 +1,6 @@
 TOOL_NAME = XcodeGen
 export EXECUTABLE_NAME = xcodegen
-VERSION = 2.29.0
+VERSION = 2.30.0
 
 PREFIX = /usr/local
 INSTALL_PATH = $(PREFIX)/bin/$(EXECUTABLE_NAME)
@@ -40,10 +40,6 @@ release:
 
 publish: archive brew
 	echo "published $(VERSION)"
-
-brew:
-	brew update
-	brew bump-formula-pr --url=$(RELEASE_TAR) XcodeGen
 
 archive: build
 	./scripts/archive.sh "$(EXECUTABLE_PATH)"
