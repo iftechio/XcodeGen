@@ -7,6 +7,7 @@ public struct TargetScheme: Equatable {
     public static let disableMainThreadCheckerDefault = false
     public static let stopOnEveryMainThreadCheckerIssueDefault = false
     public static let buildImplicitDependenciesDefault = true
+    public static let sharedDefault = true
 
     public var testTargets: [Scheme.Test.TestTarget]
     public var configVariants: [String]
@@ -23,6 +24,9 @@ public struct TargetScheme: Equatable {
     public var preActions: [Scheme.ExecutionAction]
     public var postActions: [Scheme.ExecutionAction]
     public var testPlans: [TestPlan]
+    public var shared: Bool
+    public var orderHint: Int?
+    public var isShown: Bool?
 
     public init(
         testTargets: [Scheme.Test.TestTarget] = [],
@@ -39,7 +43,10 @@ public struct TargetScheme: Equatable {
         commandLineArguments: [String: Bool] = [:],
         environmentVariables: [XCScheme.EnvironmentVariable] = [],
         preActions: [Scheme.ExecutionAction] = [],
-        postActions: [Scheme.ExecutionAction] = []
+        postActions: [Scheme.ExecutionAction] = [],
+        shared: Bool = sharedDefault,
+        orderHint: Int? = nil,
+        isShown: Bool? = nil
     ) {
         self.testTargets = testTargets
         self.testPlans = testPlans
@@ -51,11 +58,23 @@ public struct TargetScheme: Equatable {
         self.region = region
         self.disableMainThreadChecker = disableMainThreadChecker
         self.stopOnEveryMainThreadCheckerIssue = stopOnEveryMainThreadCheckerIssue
+        self.isShown = isShown
         self.buildImplicitDependencies = buildImplicitDependencies
         self.commandLineArguments = commandLineArguments
         self.environmentVariables = environmentVariables
         self.preActions = preActions
         self.postActions = postActions
+        self.shared = shared
+        self.orderHint = orderHint
+        self.postActions = postActions
+    }
+
+    public var management: Scheme.Management? {
+        guard shared != TargetScheme.sharedDefault || orderHint != nil || isShown != nil else {
+            return nil
+        }
+        
+        return Scheme.Management(shared: shared,orderHint: orderHint,isShown: isShown)
     }
 }
 
@@ -105,6 +124,9 @@ extension TargetScheme: JSONObjectConvertible {
         environmentVariables = try XCScheme.EnvironmentVariable.parseAll(jsonDictionary: jsonDictionary)
         preActions = jsonDictionary.json(atKeyPath: "preActions") ?? []
         postActions = jsonDictionary.json(atKeyPath: "postActions") ?? []
+        shared = jsonDictionary.json(atKeyPath: "shared") ?? TargetScheme.sharedDefault
+        orderHint = jsonDictionary.json(atKeyPath: "orderHint")
+        isShown = jsonDictionary.json(atKeyPath: "isShown")
     }
 }
 
@@ -147,6 +169,18 @@ extension TargetScheme: JSONEncodable {
 
         if let region = region {
             dict["region"] = region
+        }
+
+        if shared != TargetScheme.sharedDefault {
+            dict["shared"] = shared
+        }
+
+        if let orderHint = orderHint {
+            dict["orderHint"] = orderHint
+        }
+
+        if let isShown = isShown {
+            dict["isShown"] = isShown
         }
 
         return dict
