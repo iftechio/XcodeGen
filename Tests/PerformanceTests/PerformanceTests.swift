@@ -13,10 +13,13 @@ class GeneratedPerformanceTests: XCTestCase {
         let project = try Project.testProject(basePath: basePath)
         let specPath = basePath + "project.yaml"
         try dumpYamlDictionary(project.toJSONDictionary(), path: specPath)
+        var cachedSpecFiles: [Path: SpecFile] = [:]
 
         measure {
-            let spec = try! SpecFile(path: specPath)
-            _ = spec.resolvedDictionary(variables: ProcessInfo.processInfo.environment)
+            let spec = try! SpecFile(path: specPath,
+                                     cachedSpecFiles: &cachedSpecFiles,
+                                     variables: ProcessInfo.processInfo.environment)
+            _ = spec.resolvedDictionary()
         }
     }
 

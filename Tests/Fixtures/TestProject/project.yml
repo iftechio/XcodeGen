@@ -121,6 +121,7 @@ targets:
         resourceTags:
           - tag1
           - tag2
+      - path: App_Clip/Base.lproj/Storyboard.storyboard
     settings:
       INFOPLIST_FILE: App_iOS/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.project.app
@@ -146,6 +147,9 @@ targets:
       - package: Swinject
         product: Swinject
         platformFilter: iOS
+# https://github.com/yonaskolb/XcodeGen/issues/1232
+# After GitHub Actions start supporting Xcode 14, an example for extensionKit should be added.
+#      - target: ExtensionKitExtension
     onlyCopyFilesOnInstall: true
     scheme:
       testTargets:
@@ -387,9 +391,17 @@ targets:
   App_Clip_UITests:
     type: bundle.ui-testing
     platform: iOS
-    sources: App_Clip_UITests
+    sources:
+     - path: App_Clip_UITests
+     - path: App_Clip/en.lproj/Localizable.stringsdict
     dependencies:
       - target: App_Clip
+# https://github.com/yonaskolb/XcodeGen/issues/1232
+# After GitHub Actions start supporting Xcode 14, an example for extensionKit should be added.
+#  ExtensionKitExtension:
+#    type: extensionkit-extension
+#    platform: iOS
+#    sources: ExtensionKit Extension
 
 schemes:
   Framework:
@@ -419,6 +431,7 @@ schemes:
         allow: true
         defaultLocation: Honolulu, HI, USA
       customLLDBInit: ${SRCROOT}/.lldbinit
+      enableGPUFrameCaptureMode: "disabled"
       storeKitConfiguration: "App_iOS/Configuration.storekit"
       macroExpansion: App_iOS 
     test:
